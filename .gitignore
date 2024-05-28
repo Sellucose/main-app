@@ -2,7 +2,7 @@
 node_modules
 
 # serviceAccount
-src/config/service_account/*
+src/config/service_account/
 
 # env
 .env
