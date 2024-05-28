@@ -1,0 +1,8 @@
+# package node_modules
+node_modules
+
+# serviceAccount
+src/configs/service_account/*
+
+# env
+.env
