@@ -2,6 +2,7 @@
 node_modules
 
 # serviceAccount
+/**/serviceAccountKey.json
 src/config/service_account/
 
 # env

@@ -2,39 +2,94 @@ const { createUser, findingUser, comparePass }  = require('../model/userModel');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (users) => {
-    return jwt.sign({ id: users.id, email: users.email}, process.env.JWT_SECRET_KEY, { expiresIn: '1h' })
+    return jwt.sign({ id: users.id, email: users.email}, process.env.JWT_SECRET, { expiresIn: '1h' })
 }
 
 const register = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, password_confirmation } = req.body;
 
     try {
         const existUser = await findingUser(email);
-        if(existUser){
-            return res.status(400).json({ error: 'Username already exists' })
+
+        // Validate the email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(422).json({
+                status: 'fail',
+                message: 'Email tidak valid.'
+            });
         }
+
+        // Check if password is too short
+        if (password.length < 8) {
+            return res.status(422).json({
+                status: 'fail',
+                message: 'Password paling tidak harus berisi 8 karakter.'
+            });
+        }
+
+        // Check if password and password confirmation match
+        if (password !== password_confirmation) {
+            return res.status(409).json({
+                status: 'fail',
+                message: 'Password tidak sesuai.'
+            });
+        }
+
+        // check user exist
+        if (existUser) {
+            return res.status(409).json({
+                status: 'fail',
+                message: 'Email telah terdaftar.'
+            });
+        }
+
         const userId = await createUser(email, password);
-        res.status(201).json({ message: 'User registered successfully', userId });
-    }catch(error) {
-        res.status(500).json({ error: 'internal server error' })
+        return res.status(201).json({
+            status: 'success',
+            message: 'Registrasi berhasil.',
+            data: {
+                user_id: userId
+            }
+        });
+    } catch(error) {
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Terjadi kesalahan pada server, silakan coba lagi.'
+        })
     }
 }
 
 const login = async (req, res) => {
     const { email, password } = req.body;
-    try{
+
+    try {
         const existUser = await findingUser(email);
+
+        // check if the account is not available
+        if (!existUser) {
+            return res.status(401).json({
+                status: 'fail',
+                message: 'Kredensial tidak cocok.'
+            })
+        }
+
+        // check the password
         const checkPassword = await comparePass(password, existUser.password)
         if (!existUser || !checkPassword){
             return res.status(401).json({
-                error: 'Invalid email or password'
+                status: 'fail',
+                message: 'Kredensial tidak cocok.'
             })
         }
+
         const token = generateToken(existUser);
-        res.json({ token });
+
+        return res.json({ token });
     } catch (error) {
-        res.status(500).json({
-            error: 'Internal server error'
+        return res.status(500).json({
+            status: 'fail',
+            message: 'Terjadi kesalahan pada server, silakan coba lagi.'
         })
     }
 }
