@@ -1,8 +1,11 @@
+const fs = require('fs');
 const { createUser, findingUser, comparePass }  = require('../model/userModel');
 const jwt = require('jsonwebtoken');
 
+const JWT_SECRET = fs.readFileSync(process.env.JWT_KEY_PATH);
+
 const generateToken = (users) => {
-    return jwt.sign({ id: users.id, email: users.email}, process.env.JWT_SECRET, { expiresIn: '1h' })
+    return jwt.sign({ id: users.id, email: users.email}, JWT_SECRET.toString(), { expiresIn: '1h' })
 }
 
 const register = async (req, res) => {
