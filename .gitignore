@@ -1,6 +1,9 @@
 # package node_modules
 node_modules
 
+# jwt key
+/**/jwtSecretKey.txt
+
 # serviceAccount
 /**/serviceAccountKey.json
 
