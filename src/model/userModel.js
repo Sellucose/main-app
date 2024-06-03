@@ -1,4 +1,4 @@
-const db = require('../config/configFireStore')
+const db = require('../config/firestoreConfig')
 const bcrypt = require('bcryptjs')
 
 const dataUser = db.collection('users');

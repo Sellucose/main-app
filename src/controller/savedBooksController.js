@@ -1,26 +1,17 @@
-const { checkBookByISBN, getBooksByISBN } = require('../model/bookModel');
+const { checkBookByISBN } = require('../model/bookModel');
 const { getSavedBooks, isBookAlreadySaved, saveBook, unsaveBook } = require('../model/savedBookModel');
 
 const getSavedBooksController = async (req, res) => {
   try {
     const userId = req.user.id;
   
-    const snapshot = await getSavedBooks(userId);
-    const bookISBNs = snapshot.docs.map(doc => doc.get('isbn'));
-    const books = await getBooksByISBN(bookISBNs);
-
-    let bookIndex = 0;
+    const data = await getSavedBooks(userId);
     
-    const statusCode = snapshot.size > 0 ? 200 : 404;
+    const statusCode = data.length > 0 ? 200 : 404;
 
     res.status(statusCode).send({
       status: 'success',
-      data: snapshot.docs.map(doc => {
-        return {
-          id: doc.id,
-          book: books[bookIndex++]
-        }
-      })
+      data
     });
   } catch (error) {
     console.log(error);

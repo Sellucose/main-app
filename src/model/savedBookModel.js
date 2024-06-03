@@ -1,10 +1,24 @@
-const firestore = require('../config/configFireStore')
+const firestore = require('../config/firestoreConfig')
 
 const getSavedBooks = async (userId) => {
   try {
-    return await firestore.collection('saved_books')
-      .where('user_id', '==', userId)
+    const snapshot = await firestore.collection('saved_books')
+      .where('user_id', '==', firestore.doc(`users/${userId}`))
       .get();
+
+    const results = [];
+      
+    for (let i = 0; i <= snapshot.docs.length - 1; i++) {
+      const bookRef = await snapshot.docs[i].get('isbn');
+      const bookSnapshot = await bookRef.get();
+
+      results.push({
+        id: snapshot.docs[i].id,
+        book: bookSnapshot.data()
+      });
+    }
+
+    return results;
   } catch (error) {
     throw error;
   }
@@ -13,9 +27,9 @@ const getSavedBooks = async (userId) => {
 const isBookAlreadySaved = async (userId, isbn) => {
   try {
     const snapshot = await firestore.collection('saved_books')
-    .where('user_id', '==', userId)
-    .where('isbn', '==', isbn)
-    .get();
+      .where('user_id', '==', firestore.doc(`users/${userId}`))
+      .where('isbn', '==', firestore.doc(`books/${isbn}`))
+      .get();
   
     return !snapshot.empty;
   } catch (error) {
@@ -27,8 +41,8 @@ const saveBook = async (userId, isbn) => {
   try {
     const document = firestore.collection('saved_books').doc();
     return await document.set({
-      user_id: userId,
-      isbn
+      user_id: firestore.doc(`users/${userId}`),
+      isbn: firestore.doc(`books/${isbn}`)
     });
   } catch (error) {
     throw error;
@@ -38,8 +52,8 @@ const saveBook = async (userId, isbn) => {
 const unsaveBook = async (userId, isbn) => {
   try {
     const snapshot = await firestore.collection('saved_books')
-      .where('user_id', '==', userId)
-      .where('isbn', '==', isbn)
+      .where('user_id', '==', firestore.doc(`users/${userId}`))
+      .where('isbn', '==', firestore.doc(`books/${isbn}`))
       .get();
 
     if (snapshot.size > 0 && snapshot.docs[0].exists) {
