@@ -4,17 +4,15 @@ const { getSavedBooks, isBookAlreadySaved, saveBook, unsaveBook } = require('../
 const getSavedBooksController = async (req, res) => {
   try {
     const userId = req.user.id;
-  
     const data = await getSavedBooks(userId);
     
     const statusCode = data.length > 0 ? 200 : 404;
-
     res.status(statusCode).send({
       status: 'success',
       data
     });
   } catch (error) {
-    console.log(error);
+    console.log('Error at controller: ', error);
     return res.status(500).json({
       status: 'fail',
       message: 'Terjadi kesalahan pada server, silakan coba lagi.'
@@ -52,7 +50,7 @@ const saveBookController = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    console.log('Error at controller: ', error);
     return res.status(500).json({
       status: 'fail',
       message: 'Terjadi kesalahan pada server, silakan coba lagi.'

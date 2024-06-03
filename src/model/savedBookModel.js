@@ -1,6 +1,6 @@
 const firestore = require('../config/firestoreConfig')
 
-const getSavedBooks = async (userId) => {
+const getSavedBooks = async userId => {
   try {
     const snapshot = await firestore.collection('saved_books')
       .where('user_id', '==', firestore.doc(`users/${userId}`))
@@ -20,6 +20,7 @@ const getSavedBooks = async (userId) => {
 
     return results;
   } catch (error) {
+    console.error('Error getting the document:', error);
     throw error;
   }
 }
@@ -33,6 +34,7 @@ const isBookAlreadySaved = async (userId, isbn) => {
   
     return !snapshot.empty;
   } catch (error) {
+    console.error('Error getting the document:', error);
     throw error;
   }
 }
@@ -45,6 +47,7 @@ const saveBook = async (userId, isbn) => {
       isbn: firestore.doc(`books/${isbn}`)
     });
   } catch (error) {
+    console.error('Error getting the document:', error);
     throw error;
   }
 }
@@ -63,6 +66,7 @@ const unsaveBook = async (userId, isbn) => {
 
     return false;
   } catch (error) {
+    console.error('Error getting the document:', error);
     throw error;
   }
 }
