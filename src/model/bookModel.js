@@ -1,33 +1,23 @@
-const mysql = require('../config/configMysql');
+const firestore = require('../config/firestoreConfig');
 
 const checkBookByISBN = async (isbn) => {
   try {
-    const query = 'SELECT 1 FROM books WHERE isbn = ? LIMIT 1';
-    const [results] = await mysql.query(query, [isbn]);
-
-    return results.length > 0;
+    const docRef = await firestore.collection('books').doc(isbn).get();
+    return docRef.exists;
   } catch (error) {
     console.error('Error executing query:', error);
     throw error;
   }
 }
 
-const getBooksByISBN = async (isbns) => {
+const getBookByISBN = async (bookDoc) => {
   try {
-    if (isbns.length) {
-      const placeholders = isbns.map(() => '?').join(',');
-      const query = `SELECT * FROM books WHERE isbn IN (${placeholders})`;
-      
-      const [results] = await mysql.query(query, isbns);
-  
-      return results;
-    }
-
-    return [];
+    const docRef = await bookDoc.get();
+    return await docRef.data();
   } catch (error) {
     console.error('Error executing query:', error);
     throw error;
   }
-};
+}
 
-module.exports = { checkBookByISBN, getBooksByISBN };
+module.exports = { checkBookByISBN, getBookByISBN };

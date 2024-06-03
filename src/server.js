@@ -2,13 +2,13 @@ require('dotenv').config();
 const fs = require('fs')
 const cookieParser = require('cookie-parser');
 const express = require('express');
-const authRouter = require('./routes/auth')
+const router = require('./routes/route');
 
 const app = express();
 app.use(cookieParser());
-app.use(express.json())
+app.use(express.json());
 
-app.use('/', authRouter)
+app.use(router);
 
 const port = process.env.PORT
 app.listen(port,() => {
@@ -16,6 +16,6 @@ app.listen(port,() => {
     fs.writeFileSync(process.env.SERVICE_ACCOUNT_PATH, process.env.SERVICE_ACCOUNT)
   }
 
-  console.log(`berjalan di port ${port}`)
+  console.log(`berjalan di port ${port}`);
 })
 
