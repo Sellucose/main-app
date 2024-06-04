@@ -4,18 +4,23 @@ const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 
 const authRoutes = require('./authRoute')
-const savedBookRoutes = require('./savedBookRoute')
+const savedBookRoutes = require('./savedBookRoute');
+const recommendationsRoute = require('./recommendationsRoute');
 
 router.get('/main', authMiddleware, (req,res) => {
   res.json({ message: 'login only bos', user: req.user });
 });
 
-authRoutes.forEach(authRoute => {
-  router[authRoute.method](authRoute.path, authRoute.controller);
+authRoutes.forEach(route => {
+  router[route.method](route.path, route.controller);
 });
 
-savedBookRoutes.forEach(savedBookRoute => {
-  router[savedBookRoute.method](savedBookRoute.path, savedBookRoute.middleware, savedBookRoute.controller);
+savedBookRoutes.forEach(route => {
+  router[route.method](route.path, route.middleware, route.controller);
+});
+
+recommendationsRoute.forEach(route => {
+  router[route.method](route.path, route.middleware, route.controller);
 });
 
 module.exports = router;
