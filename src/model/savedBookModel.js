@@ -3,13 +3,13 @@ const firestore = require('../config/firestoreConfig')
 const getSavedBooks = async userId => {
   try {
     const snapshot = await firestore.collection('saved_books')
-      .where('user_id', '==', firestore.doc(`users/${userId}`))
+      .where('user', '==', firestore.doc(`users/${userId}`))
       .get();
 
     const results = [];
       
     for (let i = 0; i <= snapshot.docs.length - 1; i++) {
-      const bookRef = await snapshot.docs[i].get('isbn');
+      const bookRef = await snapshot.docs[i].get('book');
       const bookSnapshot = await bookRef.get();
 
       results.push({
@@ -28,8 +28,8 @@ const getSavedBooks = async userId => {
 const isBookAlreadySaved = async (userId, isbn) => {
   try {
     const snapshot = await firestore.collection('saved_books')
-      .where('user_id', '==', firestore.doc(`users/${userId}`))
-      .where('isbn', '==', firestore.doc(`books/${isbn}`))
+      .where('user', '==', firestore.doc(`users/${userId}`))
+      .where('book', '==', firestore.doc(`books/${isbn}`))
       .get();
   
     return !snapshot.empty;
@@ -43,8 +43,8 @@ const saveBook = async (userId, isbn) => {
   try {
     const document = firestore.collection('saved_books').doc();
     return await document.set({
-      user_id: firestore.doc(`users/${userId}`),
-      isbn: firestore.doc(`books/${isbn}`)
+      user: firestore.doc(`users/${userId}`),
+      book: firestore.doc(`books/${isbn}`)
     });
   } catch (error) {
     console.error('Error getting the document:', error);
@@ -55,8 +55,8 @@ const saveBook = async (userId, isbn) => {
 const unsaveBook = async (userId, isbn) => {
   try {
     const snapshot = await firestore.collection('saved_books')
-      .where('user_id', '==', firestore.doc(`users/${userId}`))
-      .where('isbn', '==', firestore.doc(`books/${isbn}`))
+      .where('user', '==', firestore.doc(`users/${userId}`))
+      .where('book', '==', firestore.doc(`books/${isbn}`))
       .get();
 
     if (snapshot.size > 0 && snapshot.docs[0].exists) {
