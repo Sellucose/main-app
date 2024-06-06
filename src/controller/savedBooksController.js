@@ -4,12 +4,19 @@ const { getSavedBooks, isBookAlreadySaved, saveBook, unsaveBook } = require('../
 const getSavedBooksController = async (req, res) => {
   try {
     const userId = req.user.id;
-    const data = await getSavedBooks(userId);
+    const limit = req.query.limit || 9;
+    let lastCreatedAt = req.query.lastCreatedAt;
+
+    const books = await getSavedBooks(userId, limit, lastCreatedAt);
+    lastCreatedAt = books.length > 0
+      ? books[books.length - 1].createdAt
+      : null;
     
-    const statusCode = data.length > 0 ? 200 : 404;
+    const statusCode = books.length > 0 ? 200 : 404;
+
     res.status(statusCode).send({
       status: 'success',
-      data
+      data: { books, lastCreatedAt }
     });
   } catch (error) {
     console.log('Error at controller: ', error);
