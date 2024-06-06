@@ -4,8 +4,8 @@ const {
     createUser,
     findUser,
     comparePass,
-    checkIfEmailRegistered,
-    checkIfUsernameTaken
+    checkIfEmailIsRegistered,
+    checkIfUsernameIsTaken
 }  = require('../model/userModel');
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY || fs.readFileSync(process.env.JWT_KEY_PATH);
@@ -31,7 +31,7 @@ const register = async (req, res) => {
         }
 
         // check email registered
-        if (await checkIfEmailRegistered(email)) {
+        if (await checkIfEmailIsRegistered(email)) {
             return res.status(409).json({
                 status: 'fail',
                 message: 'Email telah terdaftar.'
@@ -47,7 +47,7 @@ const register = async (req, res) => {
         }
 
         // Check if username is too short
-        if (await checkIfUsernameTaken(username)) {
+        if (await checkIfUsernameIsTaken(username)) {
             return res.status(409).json({
                 status: 'fail',
                 message: 'Username tersebut telah digunakan.'
