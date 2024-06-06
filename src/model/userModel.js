@@ -1,6 +1,6 @@
 const { Filter } = require('@google-cloud/firestore');
-const db = require('../config/firestoreConfig')
-const bcrypt = require('bcryptjs')
+const db = require('../config/firestoreConfig');
+const bcrypt = require('bcryptjs');
 
 const usersRef = db.collection('users');
 

@@ -1,5 +1,6 @@
 const firestore = require('../config/firestoreConfig');
 const { checkIfEmailIsRegistered, checkIfUsernameIsTaken } = require('../model/userModel');
+const bcrypt = require('bcryptjs');
 
 const getProfileController = async (req, res) => {
   const userId = req.user.id;
@@ -35,26 +36,26 @@ const getProfileController = async (req, res) => {
   }
 }
 
-const changeUsername = async (userId, username) => {
+const changeUsername = (batch, userId, username) => {
   try {
-    await firestore.collection('users').doc(userId).set({ username });
+    batch.update(firestore.collection('users').doc(userId), { username });
   } catch (error) {
     throw error;
   }
 }
 
-const changeEmail = async (userId, email) => {
+const changeEmail = (batch, userId, email) => {
   try {
-    await firestore.collection('users').doc(userId).set({ email });
+    batch.update(firestore.collection('users').doc(userId), { email });
   } catch (error) {
     throw error;
   }
 }
 
-const changePassword = async (userId, password) => {
+const changePassword = async (batch, userId, password) => {
   try {
-    const password = await bcrypt.hash(password, 10);
-    firestore.collection('users').doc(userId).set({ password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    batch.update(firestore.collection('users').doc(userId), { password: hashedPassword });
   } catch (error) {
     throw error;
   }
@@ -65,6 +66,8 @@ const updateProfileController = async (req, res) => {
   const { email, username, password, password_confirmation } = req.body;
 
   try {
+    const batch = firestore.batch();
+
     const userDocRef = firestore.collection('users').doc(userId);
     const userSnapshot = await userDocRef.get();
 
@@ -90,7 +93,7 @@ const updateProfileController = async (req, res) => {
         });
       }
 
-      await changeUsername(userId, username);
+      changeUsername(batch, userId, username);
     }
 
     if (password) {
@@ -108,10 +111,10 @@ const updateProfileController = async (req, res) => {
         });
       }
 
-      await changePassword(userId, password);
+      await changePassword(batch, userId, password);
     }
 
-    if (email) {
+    if (email && (email != userSnapshot.get('email'))) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return res.status(422).json({
           status: 'fail',
@@ -119,20 +122,23 @@ const updateProfileController = async (req, res) => {
         });
       }
     
-      if (checkIfEmailIsRegistered(email, userId)) {
+      if (await checkIfEmailIsRegistered(email, userId)) {
         return res.status(409).send({
           status: 'fail',
           message: 'Email telah terdaftar.'
         });
       }
 
-      await changeEmail(userId, email);
+      changeEmail(batch, userId, email);
+
+      batch.commit();
 
       return res.status(200).json({
         status: 'success',
         message: 'Profil berhasil diedit, dan silakan cek emailmu.'
       });
     } else {
+      batch.commit();
       return res.status(200).json({
         status: 'success',
         message: 'Profil berhasil diedit.'
