@@ -1,19 +1,27 @@
 const firestore = require('../config/firestoreConfig')
 
-const getSavedBooks = async userId => {
+const getSavedBooks = async (userId, limit = 9, lastCreatedAt = null) => {
   try {
-    const snapshot = await firestore.collection('saved_books')
+    let collectionRef = firestore.collection('saved_books')
+      .orderBy('createdAt')
       .where('user', '==', firestore.doc(`users/${userId}`))
-      .get();
+      .limit(limit);
+
+    if (lastCreatedAt != null) {
+      collectionRef = collectionRef.startAfter(new Date(lastCreatedAt));
+    }
+
+    const snapshot = await collectionRef.get();
 
     const results = [];
       
-    for (let i = 0; i <= snapshot.docs.length - 1; i++) {
+    for (let i = 0; i < snapshot.docs.length; i++) {
       const bookRef = await snapshot.docs[i].get('book');
       const bookSnapshot = await bookRef.get();
 
       results.push({
         id: snapshot.docs[i].id,
+        createdAt: snapshot.docs[i].get('createdAt').toDate(),
         book: bookSnapshot.data()
       });
     }
