@@ -4,11 +4,11 @@ const bcrypt = require('bcryptjs')
 
 const usersRef = db.collection('users');
 
-const createUser = async (email, passsword) => {
+const createUser = async (email, username, password) => {
     try {
-        const password = await bcrypt.hash(passsword,10);
-        const userRef = await usersRef.add({ email, password })
-        return userRef.id
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const userRef = await usersRef.add({ email, username, password: hashedPassword });
+        return userRef.id;
     } catch (error) {
         throw error;
     }
@@ -30,18 +30,32 @@ const findUser = async keyword => {
     return { id: userDoc.id, ...userDoc.data() };
 }
 
-const checkIfEmailRegistered = async email => {
+const checkIfEmailIsRegistered = async (email, exceptUserId = null) => {
     try {
-        const userSnapshot = await usersRef.where('email', '==', email).get();
+        let userQuery = usersRef.where('email', '==', email);
+
+        if (exceptUserId != null) {
+            userQuery = userQuery.where('__name__', '!=', exceptUserId); 
+        }
+
+        const userSnapshot = await userQuery.get();
+        
         return !userSnapshot.empty;
     } catch (error) {
         throw error;
     }
 }
 
-const checkIfUsernameTaken = async username => {
+const checkIfUsernameIsTaken = async (username, exceptUserId = null) => {
     try {
-        const userSnapshot = await usersRef.where('username', '==', username).get();
+        let userQuery = usersRef.where('username', '==', username);
+
+        if (exceptUserId != null) {
+            userQuery = userQuery.where('__name__', '!=', exceptUserId); 
+        }
+
+        const userSnapshot = await userQuery.get();
+
         return !userSnapshot.empty;
     } catch (error) {
         throw error;
@@ -51,4 +65,4 @@ const checkIfUsernameTaken = async username => {
 const comparePass = async (currentPass, passStored) =>
     bcrypt.compare(currentPass, passStored);
 
-module.exports = { createUser, findUser, comparePass, checkIfEmailRegistered, checkIfUsernameTaken }
+module.exports = { createUser, findUser, comparePass, checkIfEmailIsRegistered, checkIfUsernameIsTaken }
