@@ -70,7 +70,7 @@ const register = async (req, res) => {
             });
         }
 
-        await createUser(email, password);
+        await createUser(email, username, password);
 
         return res.status(201).json({
             status: 'success',

@@ -4,11 +4,11 @@ const bcrypt = require('bcryptjs')
 
 const usersRef = db.collection('users');
 
-const createUser = async (email, passsword) => {
+const createUser = async (email, username, password) => {
     try {
-        const password = await bcrypt.hash(passsword,10);
-        const userRef = await usersRef.add({ email, password })
-        return userRef.id
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const userRef = await usersRef.add({ email, username, password: hashedPassword });
+        return userRef.id;
     } catch (error) {
         throw error;
     }
