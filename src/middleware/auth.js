@@ -1,7 +1,7 @@
 const fs = require('fs');
 const jwt = require('jsonwebtoken')
 
-const JWT_SECRET = process.env.JWT_SECRET_KEY || fs.readFileSync(process.env.JWT_KEY_PATH);
+const JWT_SECRET = process.env.JWT_SECRET_KEY;
 
 const authMiddleware = async (req, res, next) => {
   const { authorization } = req.headers
@@ -22,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
       message: 'Unauthorized'
     })
   }
-  next()
+  next();
 }
 
 module.exports = authMiddleware;
