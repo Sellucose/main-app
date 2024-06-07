@@ -8,7 +8,7 @@ const {
     checkIfUsernameIsTaken
 }  = require('../model/userModel');
 
-const JWT_SECRET = process.env.JWT_SECRET_KEY || fs.readFileSync(process.env.JWT_KEY_PATH);
+const JWT_SECRET = process.env.JWT_SECRET_KEY
 
 const generateToken = user =>
     jwt.sign(
