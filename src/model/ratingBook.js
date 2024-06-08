@@ -2,8 +2,12 @@ const firestore = require('../config/firestoreConfig')
 
 const ratingBook = firestore.collection('rateBook');
 const addRatingBook = async (isbn, reviewer, rate,review) => {
+const addRatingBook = async (isbn, reviewer, rate,review) => {
     await ratingBook.add({
         isbn,
+        reviewer,
+        rate,
+        review
         reviewer,
         rate,
         review
