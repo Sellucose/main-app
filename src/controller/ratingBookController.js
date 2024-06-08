@@ -1,10 +1,10 @@
 const { addRatingBook, getRatingByIsbn } = require('../model/ratingBook');
 
 const addRate = async (req, res) => {
-  const { isbn, user_id, rate } = req.body;
+  const { isbn, reviewer, rate, review } = req.body;
 
   try{
-    await addRatingBook(isbn, user_id, rate)
+    await addRatingBook(isbn, reviewer, rate, review)
     res.status(200).send('Rating added successfully');
   } catch(error) {
     console.error('Error adding rating:', error);
