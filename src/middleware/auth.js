@@ -8,7 +8,7 @@ const authMiddleware = async (req, res, next) => {
   
   if(!authorization){
     return res.status(401).json({
-      message: 'no Token'
+      message: 'please login first'
     })
   }
 

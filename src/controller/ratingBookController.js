@@ -1,10 +1,16 @@
 const { addRatingBook, getRatingByIsbn } = require('../model/ratingBook');
+const { findUser } = require('../model/userModel');
 
 const addRate = async (req, res) => {
-  const { isbn, reviewer, rate, review } = req.body;
-
+  const { isbn, username, rate, review } = req.body;
   try{
-    await addRatingBook(isbn, reviewer, rate, review)
+    const user = await findUser(username)
+
+    if(!user) {
+      return res.status(404).send('User not found');
+    }
+
+    await addRatingBook(isbn, username, rate, review)
     res.status(200).send('Rating added successfully');
   } catch(error) {
     console.error('Error adding rating:', error);
@@ -15,6 +21,10 @@ const addRate = async (req, res) => {
 const getAverageRating = async (req, res) => {
   const { isbn } = req.params;
 
+  if(!isbn) {
+    return res.status(400).send('ISBN is required');
+  }
+
   try {
     const snapshot = await getRatingByIsbn(isbn);
 
@@ -22,7 +32,6 @@ const getAverageRating = async (req, res) => {
       return res.status(404).send('No ratings found for this ISBN');
     }
     
-
     let totalRating = 0;
     let count = 0;
 
