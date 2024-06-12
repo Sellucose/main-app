@@ -70,11 +70,12 @@ const register = async (req, res) => {
             });
         }
 
-        await createUser(email, username, password);
+        const userId = await createUser(email, username, password);
 
         return res.status(201).json({
             status: 'success',
-            message: 'Registrasi berhasil, anda sudah bisa login.'
+            message: 'Registrasi berhasil, anda sudah bisa login.',
+            data: { user_id: userId }
         });
     } catch(error) {
         console.log('Error at controller: ', error);
@@ -110,7 +111,11 @@ const login = async (req, res) => {
 
         const token = generateToken(user);
 
-        return res.json({ token });
+        return res.json({
+            status: 'success',
+            message: 'Login berhasil.',
+            token
+        });
     } catch (error) {
         console.log('Error at controller: ', error);
         return res.status(500).json({
