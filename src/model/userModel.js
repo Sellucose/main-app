@@ -3,12 +3,19 @@ const db = require('../config/firestoreConfig');
 const bcrypt = require('bcryptjs');
 
 const usersRef = db.collection('users');
+let nextUserId = 8;
 
 const createUser = async (email, username, password) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const userRef = await usersRef.add({ email, username, password: hashedPassword });
-        return userRef.id;
+        const user_id = nextUserId++;
+        await usersRef.doc(user_id.toString()).set({
+            email: email,
+            username: username,
+            password: hashedPassword,
+            user_id: user_id
+        });
+        return user_id;
     } catch (error) {
         throw error;
     }
