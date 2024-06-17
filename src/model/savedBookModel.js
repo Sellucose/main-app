@@ -52,7 +52,8 @@ const saveBook = async (userId, isbn) => {
     const document = firestore.collection('saved_books').doc();
     return await document.set({
       user: firestore.doc(`users/${userId}`),
-      book: firestore.doc(`books/${isbn}`)
+      book: firestore.doc(`books/${isbn}`),
+      createdAt: new Date()
     });
   } catch (error) {
     console.error('Error getting the document:', error);
