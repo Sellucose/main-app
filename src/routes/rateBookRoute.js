@@ -3,21 +3,21 @@ const authMiddleware = require('../middleware/auth')
 module.exports = [
     {
         path: '/books/rated',
-        method: 'post',
-        middleware: authMiddleware,
-        controller: addRate
-    },
-    {
-        path: '/books/rated',
         method: 'get',
         middleware: authMiddleware,
         controller: getAllRated
     },
     {
-        path: '/books/:isbn',
+        path: '/books/rated/:isbn',
         method: 'get',
         middleware: authMiddleware,
         controller: getBookRating
+    },
+    {
+        path: '/books/rate',
+        method: 'post',
+        middleware: authMiddleware,
+        controller: addRate
     },
     {
         path: '/books/rate/update',

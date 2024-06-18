@@ -9,26 +9,29 @@ const {
 } = require('../model/ratingBook');
 
 const addRate = async (req, res) => {
-  const { ISBN, rate, review } = req.body;
-  const uppercaseIsbn = ISBN.toUpperCase();
+  const userId = req.user.id;
+  const { isbn, rating, review } = req.body;
+  const uppercaseIsbn = isbn.toUpperCase();
+
   try{
     const bookInDb = await checkBook(uppercaseIsbn);
-    if(bookInDb){
+    if (bookInDb) {
       return res.status(404).send({
         status: 'fail',
         message: 'E-book tidak ditemukan.'
-      })
+      });
     }
 
-    const hasBeenRated = await checkIsbnHasBeenRated(uppercaseIsbn);
-    if(hasBeenRated){
+    const hasBeenRated = await checkIsbnHasBeenRated(userId, uppercaseIsbn);
+    if (hasBeenRated) {
       return res.status(400).send({
         status: 'fail',
         message: 'E-book sudah dinilai'
-      })
+      });
     }
 
-    await addRatingBook(req.user.id, uppercaseIsbn, rate, review)
+    await addRatingBook(userId, uppercaseIsbn, rating, review);
+
     return res.status(200).send({
       status: 'success',
       messsage: 'E-book berhasil dinilai.'
@@ -44,61 +47,68 @@ const addRate = async (req, res) => {
 
 const getAllRated = async (req, res) => {
   try {
-    const ratedBooks = await getAllRatedBook()
+    const userId = req.user.id;
+    const ratedBooks = await getAllRatedBook(userId);
     return res.status(200).send({
       status: 'success',
       data : ratedBooks
     });
   } catch (error) {
       console.error('Failed to fetch rated books:', error);
-      res.status(500).send('Internal Server Error');
+      return res.status(500).send({
+        status: 'fail',
+        messsage: 'Terjadi kesalahan pada server, silakan coba lagi.'
+      });
   }
 }
 
 const getBookRating = async (req, res) => {
   const { isbn } = req.params;
 
-  if(!isbn) {
-    return res.status(400).send('Buku tidak ditemukan.');
+  if (!isbn) {
+    return res.status(404).send({
+      status: 'fail',
+      message: 'Buku tidak ditemukan.'
+    });
   }
 
   try {
-    const snapshot = await getRatingByIsbn(isbn);
+    const userId = req.user.id;
+    const ratings = await getRatingByIsbn(userId, isbn);
 
-    if (snapshot.empty) {
-      return res.status(404).send('No ratings found for this ISBN');
-    }
-    const users = [];
-
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      users.push({ userId: data.user_id, rating: data.rate });
+    res.status(200).send({
+      status: 'success',
+      data: ratings
     });
-
-    res.status(200).send({ isbn, users });
   } catch (error) {
     console.error('Error getting average rating:', error);
-    res.status(500).send('Internal server error');
+    res.status(500).send({
+      status: 'fail',
+      messsage: 'Terjadi kesalahan pada server, silakan coba lagi.'
+    });
   }
 };
 
 const updateRating = async (req,res) => {
-  const { isbn, rate, review } = req.body;
+  const userId = req.user.id;
+  const { isbn, rating, review } = req.body;
 
-  if(!isbn) {
+  if (!isbn) {
     res.status(404).send({
       status: 'fail',
       message: 'E-book tidak ditemukan.'
-    })
+    });
   }
-  if(!rate && !review){
+
+  if (!rating && !review) {
     res.status(400).send({
       status: 'fail',
       message: 'Isi rating dan reviewnya.'
-    })
+    });
   }
+
   try {
-    await putRating(isbn,rate,review)
+    await putRating(userId, isbn, rating, review);
     return res.status(200).send({
       status: 'success',
       message: 'Rating berhasil diedit.'
@@ -113,16 +123,18 @@ const updateRating = async (req,res) => {
 }
 
 const deletingRating = async(req,res) => {
-  const { isbn } = req.params
-  const user_id = req.user.id;
-  if(!isbn) {
+  const userId = req.user.id;
+  const { isbn } = req.params;
+
+  if (!isbn) {
     res.status(404).send({
       status: 'fail',
       message: 'E-book tidak ditemukan.'
-    })
+    });
   }
+
   try {
-    await deleteRating(isbn, user_id);
+    await deleteRating(userId, isbn);
     res.status(200).send({
       status: 'success',
       message: 'Rating berhasil dihapus.'

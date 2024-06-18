@@ -1,13 +1,13 @@
 const firestore = require('../config/firestoreConfig')
 
-const ratingBook = firestore.collection('rateBook');
+const ratingBook = firestore.collection('rated_books');
 const book = firestore.collection('books');
 
-const addRatingBook = async (ISBN, rate,review,user_id) => {
+const addRatingBook = async (userId, ISBN, rate, review) => {
     try {
         const newRating = {
-            user_id,
-            ISBN,
+            user: firestore.doc(`users/${userId}`),
+            book: firestore.doc(`books/${ISBN}`),
             rate,
             review
         };
@@ -18,35 +18,82 @@ const addRatingBook = async (ISBN, rate,review,user_id) => {
     }
 }
 
-const getRatingByIsbn = async isbn => {
-    const snapshot = await ratingBook.where('isbn', '==', isbn).get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+const getRatingByIsbn = async (userId, isbn) => {
+    const snapshot = await ratingBook
+        .where('user', '==', firestore.doc(`users/${userId}`))
+        .where('book', '==', firestore.doc(`books/${isbn}`))
+        .get();
+        
+    const ratings = [];
+        
+    for (let i = 0; i < snapshot.size; i++) {
+        const doc = snapshot.docs[i];
+        const userRef = await doc.get('user');
+        const userSnapshot = await userRef.get();
+
+        ratings.push({
+            id: doc.id,
+            user: {
+                id: userSnapshot.id,
+                username: userSnapshot.get('username')
+            },
+            rate: doc.get('rate'),
+            review: doc.get('review')
+        });
+    }
+
+    return ratings;
 }
 
-const getAllRatedBook = async () => {
+const getAllRatedBook = async userId => {
     try {
-        const snapshot = await ratingBook.where('rate','>', 0).get();
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const snapshot = await ratingBook
+            .where('rate', '>', 0)
+            .where('user', '==', firestore.doc(`users/${userId}`))
+            .get();
+
+        const ratings = [];
+            
+        for (let i = 0; i < snapshot.size; i++) {
+            const doc = snapshot.docs[i];
+            const bookRef = await doc.get('book');
+            const bookSnapshot = await bookRef.get();
+
+            ratings.push({
+                id: doc.id,
+                rate: doc.get('rate'),
+                book: bookSnapshot.data()
+            });
+        }
+
+        return ratings;
     } catch (error) {
         console.error('Error getting rated book:', error);
         throw error;
     }
 };
 
-const putRating = async (isbn, newRating, newReview) => {
+const putRating = async (userId, isbn, newRating, newReview) => {
     try{
-        const ratingUpdate = await ratingBook.where ('isbn', '==', isbn).get();
+        const ratingUpdate = await ratingBook
+            .where('user', '==', firestore.doc(`users/${userId}`))
+            .where ('book', '==', firestore.doc(`books/${isbn}`))
+            .get();
+        
         ratingUpdate.forEach(async doc => {
-            await ratingBook.doc(doc.id).update({rate:newRating, review:newReview})
-        })
+            await ratingBook.doc(doc.id).update({ rate: newRating, review: newReview })
+        });
     }catch(error) {
         console.error('Error getting rated book:', error);
         throw error;
     }
 }
-const checkIsbnHasBeenRated = async(isbn) => {
+const checkIsbnHasBeenRated = async (userId, isbn) => {
     try {
-        await ratingBook.where('isbn', '==', isbn).get()
+        await ratingBook
+            .where('user', '==', firestore.doc(`users/${userId}`))
+            .where('isbn', '==', isbn)
+            .get();
     } catch (error) {
         console.error('Error getting rated book:', error);
         throw error;
@@ -62,15 +109,18 @@ const checkBook = async(isbn) => {
     }
 }
 
-const deleteRating = async (isbn,user_id) => {
+const deleteRating = async (userId, isbn) => {
     try{
-        const queryIsbn = await ratingBook.where('isbn', '==', isbn).where('user_id', '==', user_id).get();
-        const batch = firestore.batch();
-        queryIsbn.forEach(doc => {
-            batch.delete(doc.ref)
-        })
-        await batch.commit();
-        return true;
+        const queryIsbn = await ratingBook
+            .where('user', '==', firestore.doc(`users/${userId}`))
+            .where('book', '==', firestore.doc(`books/${isbn}`))
+            .get();
+
+        if (queryIsbn.empty && queryIsbn.size > 0) {
+            return false;
+        }
+
+        return await firestore.doc(`rated_books/${queryIsbn.docs[0].id}`).delete();
     }catch(e) {
         throw e;
     }
