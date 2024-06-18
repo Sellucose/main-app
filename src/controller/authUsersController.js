@@ -13,8 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET_KEY || fs.readFileSync(process.env.JWT
 const generateToken = user =>
     jwt.sign(
         { id: user.id, email: user.email },
-        JWT_SECRET.toString(),
-        { expiresIn: '1h' }
+        JWT_SECRET.toString()
     );
 
 const register = async (req, res) => {
