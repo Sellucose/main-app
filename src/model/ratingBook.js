@@ -95,10 +95,11 @@ const checkIsbnHasBeenRated = async (userId, isbn) => {
             .where('isbn', '==', isbn)
             .get();
     } catch (error) {
-        console.error('Error getting rated book:', error);
+        console.error('Error checking rated book:', error);
         throw error;
     }
-}
+};
+
 const checkBook = async(isbn) => {
     try {
         const bookData = await book.where('ISBN', '==', isbn).get()
