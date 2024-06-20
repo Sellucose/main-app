@@ -51,7 +51,7 @@ In the ``routes`` directory, the ``route.js`` file collects all the routes from 
 As like the common standard for Express or any REST API app, this ``server.js`` is used to initialize the server, it includes initialize the routes and the port.
 
 ## Environment variables
-As been written in the ``.env`` file, there are 7 variables that needed to be set up.
+As been written in the ``.env.example`` file, there are 7 variables that needed to be set up.
 1. PORT, the port that server will be listening on.
 2. PROJECT_ID, the **Google Cloud Platform** project id.
 3. SERVICE_ACCOUNT_PATH, this is the path of the service account json file that should be downloaded from the IAM service and only for the local environment (your PC). In this current development, we save the service account json file in the ``config`` directory.
