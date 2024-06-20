@@ -156,7 +156,7 @@ Capstone project that been made using expressjs, as database firestore
         ]
     }
     ```
-#### getRateByISBN
+#### UpateRate
 
 - **URL:** `/books/rate/update`
 - **Method:** `PUT`
@@ -176,6 +176,8 @@ Capstone project that been made using expressjs, as database firestore
         "message": "Rating berhasil diedit."
     }
     ```
+
+#### DeleteRate
 
 - **URL:** `/books/rate:isbn`
 - **Method:** `DELETE`
