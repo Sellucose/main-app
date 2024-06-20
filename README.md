@@ -82,3 +82,108 @@ Capstone project that been made using expressjs, as database firestore
         "token": "your_jwt_token"
     }
     ```
+
+## Rating
+
+#### addRate
+
+- **URL:** `/books/rate`
+- **Method:** `POST`
+- **Request Body:**
+    ```json
+    {
+        "isbn": "isbnbooks",
+        "rating": "your rate"
+    }
+    ```
+
+- **Response:**
+    ```json
+    {
+        "status": "status",
+        "message": "message"
+    }
+    ```
+
+#### getAllRated
+
+- **URL:** `/books/rated`
+- **Method:** `GET`
+- **Request Body:**
+- **Response:**
+    ```json
+    {
+        "status": "success",
+        "data": [
+            {
+                "id": "7tbOEcFWV3PCzRInbhwY",
+                "ISBN": "0001010565",
+                "Book-Rating": 9,
+                "User-ID": 8
+            },
+            {
+                "id": "BFTIGRuPyncrnyxYppTu",
+                "ISBN": "842333533X",
+                "Book-Rating": 9,
+                "User-ID": 8
+            },
+            {
+                "id": "SgNoHDtg3wPeYJ9CBIng",
+                "ISBN": "0000913154",
+                "Book-Rating": 9,
+                "User-ID": 8
+            }
+        ]
+    }
+    ```
+
+#### getRateByISBN
+
+- **URL:** `/books/rated/:isbn`
+- **Method:** `GET`
+- **Request Body:**
+- **Response:**
+    ```json
+    {
+        "status": "success",
+        "data": [
+            {
+            "id": "SgNoHDtg3wPeYJ9CBIng",
+            "ISBN": "0000913154",
+            "Book-Rating": 9,
+            "User-ID": 8
+            }
+        ]
+    }
+    ```
+#### getRateByISBN
+
+- **URL:** `/books/rate/update`
+- **Method:** `PUT`
+- **Request Body:**
+- **Response:**
+    ```json
+    {
+        "isbn": "isbn number",
+        "rating": "rating number 0-10"
+    }
+    ```
+
+- **Response:**
+    ```json
+    {
+        "status": "success",
+        "message": "Rating berhasil diedit."
+    }
+    ```
+
+- **URL:** `/books/rate:isbn`
+- **Method:** `DELETE`
+- **Request Body:**
+- **Response:**
+    ```json
+    {
+        "status": "success",
+        "message": "Rating berhasil dihapus."
+    }
+    ```

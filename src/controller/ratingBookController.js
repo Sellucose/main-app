@@ -9,8 +9,8 @@ const {
 } = require('../model/ratingBook');
 
 const addRate = async (req, res) => {
-  const userId = req.user.id;
-  const { isbn, rating, review } = req.body;
+  const userId = parseInt(req.user.id);
+  const { isbn, rating } = req.body;
   const uppercaseIsbn = isbn.toUpperCase();
 
   try{
@@ -22,7 +22,7 @@ const addRate = async (req, res) => {
       });
     }
 
-    const hasBeenRated = await checkIsbnHasBeenRated(userId, uppercaseIsbn);
+    const hasBeenRated = await checkIsbnHasBeenRated(uppercaseIsbn, userId);
     if (hasBeenRated) {
       return res.status(400).send({
         status: 'fail',
@@ -30,7 +30,7 @@ const addRate = async (req, res) => {
       });
     }
 
-    await addRatingBook(userId, uppercaseIsbn, rating, review);
+    await addRatingBook(userId, uppercaseIsbn, rating);
 
     return res.status(200).send({
       status: 'success',
@@ -73,9 +73,7 @@ const getBookRating = async (req, res) => {
   }
 
   try {
-    const userId = req.user.id;
-    const ratings = await getRatingByIsbn(userId, isbn);
-
+    const ratings = await getRatingByIsbn(isbn);
     res.status(200).send({
       status: 'success',
       data: ratings
@@ -91,7 +89,7 @@ const getBookRating = async (req, res) => {
 
 const updateRating = async (req,res) => {
   const userId = req.user.id;
-  const { isbn, rating, review } = req.body;
+  const { isbn, rating } = req.body;
 
   if (!isbn) {
     res.status(404).send({
@@ -108,7 +106,7 @@ const updateRating = async (req,res) => {
   }
 
   try {
-    await putRating(userId, isbn, rating, review);
+    await putRating(userId, isbn, rating);
     return res.status(200).send({
       status: 'success',
       message: 'Rating berhasil diedit.'
@@ -134,7 +132,7 @@ const deletingRating = async(req,res) => {
   }
 
   try {
-    await deleteRating(userId, isbn);
+    await deleteRating(isbn,userId);
     res.status(200).send({
       status: 'success',
       message: 'Rating berhasil dihapus.'
